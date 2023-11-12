@@ -321,8 +321,8 @@ class _HomeUserState extends State<HomeUser> {
                           return AlertDialog(
                             title:
                                 userDataJsonString != null && userDataJsonString
-                                    ? const Text('Confirmação de Exclusão')
-                                    : const Text('Dados Não Encontrados'),
+                                    ? const Text('Confirmação de exclusão')
+                                    : const Text('Dados não encontrados'),
                             content: userDataJsonString != null &&
                                     userDataJsonString
                                 ? const Text(
@@ -373,7 +373,7 @@ class _HomeUserState extends State<HomeUser> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text('Dados Não Encontrados'),
+                                  title: const Text('Dados não encontrados'),
                                   content: const Text(
                                       'Não há dados salvos para recuperar'),
                                   actions: [
@@ -418,16 +418,10 @@ class _HomeUserState extends State<HomeUser> {
                       ).then((value) => showDialog<String>(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
-                              title: (controllerName.text.isEmpty ||
-                                      controllerEndereco.text.isEmpty ||
-                                      controllerNumero.text.isEmpty ||
-                                      controllerComplemento.text.isEmpty ||
-                                      controllerCidade.text.isEmpty ||
-                                      controllerEstado.text.isEmpty ||
-                                      controllerEmail.text.isEmpty ||
-                                      controllerSite.text.isEmpty)
-                                  ? const Text('Campos obrigatórios vazios')
-                                  : const Text('Usuário cadastrado!'),
+                              title:
+                                  (alert != "Usuário registrado com sucesso.")
+                                      ? const Text('Campos obrigatórios vazios')
+                                      : const Text('Usuário cadastrado!'),
                               content: Text(alert),
                               actions: <Widget>[
                                 TextButton(
