@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,10 +30,16 @@ class HomeUser extends StatefulWidget {
 
 class _HomeUserState extends State<HomeUser> {
   List<dynamic> _data = [];
+  late SharedPreferences saveData;
 
   @override
   void initState() {
     super.initState();
+    _initSharedPreferences();
+  }
+
+  void _initSharedPreferences() async {
+    saveData = await SharedPreferences.getInstance();
   }
 
   TextEditingController controllerName = TextEditingController(text: "");
@@ -81,6 +88,9 @@ class _HomeUserState extends State<HomeUser> {
       setState(() {
         alert = "Usuário registrado com sucesso.";
       });
+      String userDataJson = jsonEncode(data);
+      saveData.setString('data', userDataJson);
+      _limpar();
     }
   }
 
@@ -97,9 +107,29 @@ class _HomeUserState extends State<HomeUser> {
     });
   }
 
-  void _apagar() {}
+  void _apagar() {
+    saveData.clear();
+    _limpar();
+  }
 
-  void _recuperar() {}
+  void _recuperar() {
+    if (saveData.containsKey('data')) {
+      String? userDataJsonString = saveData.getString('data');
+      if (userDataJsonString != null && userDataJsonString.isNotEmpty) {
+        Map<String, dynamic>? userDataJson = jsonDecode(userDataJsonString);
+        setState(() {
+          controllerName.text = userDataJson?["name"];
+          controllerEndereco.text = userDataJson?["endereco"];
+          controllerNumero.text = userDataJson?["numero"];
+          controllerComplemento.text = userDataJson?["complemento"];
+          controllerCidade.text = userDataJson?["cidade"];
+          controllerEstado.text = userDataJson?["estado"];
+          controllerEmail.text = userDataJson?["email"];
+          controllerSite.text = userDataJson?["site"];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +313,41 @@ class _HomeUserState extends State<HomeUser> {
                       ),
                     ),
                     onPressed: () {
-                      _apagar();
+                      bool? userDataJsonString =
+                          saveData.getString('data')?.isNotEmpty;
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title:
+                                userDataJsonString != null && userDataJsonString
+                                    ? const Text('Confirmação de Exclusão')
+                                    : const Text('Dados Não Encontrados'),
+                            content: userDataJsonString != null &&
+                                    userDataJsonString
+                                ? const Text(
+                                    'Tem certeza de que deseja apagar o dado salvo?')
+                                : const Text(
+                                    'Não há dados salvos para excluir'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancelar'),
+                              ),
+                              if (userDataJsonString ?? false)
+                                TextButton(
+                                  onPressed: () {
+                                    _apagar();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Apagar'),
+                                ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     child: const Text('Apagar'),
                   ),
@@ -302,7 +366,28 @@ class _HomeUserState extends State<HomeUser> {
                       ),
                     ),
                     onPressed: () {
-                      _recuperar();
+                      bool userDataJsonString =
+                          saveData.getString('data')?.isEmpty ?? true;
+                      userDataJsonString
+                          ? showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Dados Não Encontrados'),
+                                  content: const Text(
+                                      'Não há dados salvos para recuperar'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Ok'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
+                          : _recuperar();
                     },
                     child: const Text('Recuperar'),
                   ),
